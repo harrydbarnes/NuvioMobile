@@ -117,9 +117,15 @@ export const useMetadata = ({ id, type, addonId }: UseMetadataProps): UseMetadat
 
   // Normalize anime subtypes to their base types for all internal logic.
   // anime.series behaves like series; anime.movie behaves like movie.
-  const normalizedType = type === 'anime.series' ? 'series'
-    : type === 'anime.movie' ? 'movie'
-    : type;
+  // Lowercase first — some addons use capitalized types (e.g. "Movie", "Series", "Other")
+  // which would break all type comparisons downstream.
+  const lowercasedType = type ? type.toLowerCase() : type;
+
+  // Normalize anime subtypes to their base types for all internal logic.
+  // anime.series behaves like series; anime.movie behaves like movie.
+  const normalizedType = lowercasedType === 'anime.series' ? 'series'
+    : lowercasedType === 'anime.movie' ? 'movie'
+    : lowercasedType;
 
   const [metadata, setMetadata] = useState<StreamingContent | null>(null);
   const [loading, setLoading] = useState(true);
