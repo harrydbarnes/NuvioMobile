@@ -1339,11 +1339,21 @@ const AppleTVHero: React.FC<AppleTVHeroProps> = ({
               onPress={handleSaveAction}
               activeOpacity={0.85}
             >
-              <MaterialIcons
-                name={inLibrary ? "bookmark" : "bookmark-outline"}
-                size={24}
-                color="white"
-              />
+              {Platform.OS === 'ios' ? (
+                <ExpoBlurView intensity={35} tint="light" style={styles.saveButtonBlur}>
+                  <MaterialIcons
+                    name={inLibrary ? "bookmark" : "bookmark-outline"}
+                    size={24}
+                    color="white"
+                  />
+                </ExpoBlurView>
+              ) : (
+                <MaterialIcons
+                  name={inLibrary ? "bookmark" : "bookmark-outline"}
+                  size={24}
+                  color="white"
+                />
+              )}
             </TouchableOpacity>
           </View>
 
@@ -1496,10 +1506,17 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 30,
     backgroundColor: 'rgba(255,255,255,0.2)',
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.3)',
+  },
+  saveButtonBlur: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   paginationContainer: {
     flexDirection: 'row',
