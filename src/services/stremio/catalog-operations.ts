@@ -246,7 +246,11 @@ export async function getMetaDetails(
   preferredAddonId?: string
 ): Promise<MetaDetails | null> {
   try {
-    if (!(await ctx.isValidContentId(type, id))) {
+    // isValidContentId gate removed — addonCanServeId() handles per-addon ID prefix
+    // filtering correctly. The gate caused false negatives when type was non-standard
+    // or prefixes weren't indexed yet, silently returning null before any addon was tried.
+    const lowerId = (id || '').toLowerCase();
+    if (!id || lowerId === 'null' || lowerId === 'undefined' || lowerId === 'moviebox' || lowerId === 'torbox') {
       return null;
     }
 
