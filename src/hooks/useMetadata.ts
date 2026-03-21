@@ -1576,7 +1576,9 @@ export const useMetadata = ({ id, type, addonId }: UseMetadataProps): UseMetadat
       let tmdbId;
       let stremioId = id;
       // Use TMDB-resolved type if available — handles "other", "Movie", etc.
-      let effectiveStreamType: string = resolvedTypeRef.current || normalizedType;
+      // Use metadata.type first (most reliable — comes directly from the addon's meta response),
+      // then fall back to TMDB-resolved type, then normalizedType.
+      let effectiveStreamType: string = metadata?.type || resolvedTypeRef.current || normalizedType;
 
       if (id.startsWith('tmdb:')) {
         tmdbId = id.split(':')[1];
