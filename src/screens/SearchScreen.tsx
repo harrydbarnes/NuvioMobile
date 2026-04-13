@@ -461,8 +461,9 @@ const SearchScreen = () => {
     return debounce(async (searchQuery: string) => {
       liveSearchHandle.current?.cancel();
       liveSearchHandle.current = null;
+      // ⚡ Bolt Optimization: Reduced debounce from 800ms to 300ms to make search feel significantly faster and more responsive
       performLiveSearch(searchQuery);
-    }, 800);
+    }, 300);
   }, []);
 
   useFocusEffect(
