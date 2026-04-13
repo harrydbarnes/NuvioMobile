@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
+  Linking,
   Text,
   StyleSheet,
   TouchableOpacity,
@@ -23,7 +24,7 @@ import { isMDBListEnabled } from '../../services/mdblistConstants';
 import { getAgeRatingColor } from '../../utils/ageRatingColors';
 import AgeRatingBadge from '../common/AgeRatingBadge';
 
-const IMDb_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/575px-IMDB_Logo_2016.svg.png';
+const IMDb_LOGO = require('../../../assets/rating-icons/imdb.png');
 
 // Enhanced responsive breakpoints for Metadata Details
 const BREAKPOINTS = {
@@ -240,9 +241,17 @@ const MetadataDetails: React.FC<MetadataDetailsProps> = ({
           <AgeRatingBadge rating={metadata.certification} />
         )}
         {metadata.imdbRating && !isMDBEnabled && (
-          <View style={styles.ratingContainer}>
+          <TouchableOpacity
+            style={styles.ratingContainer}
+            onPress={() => {
+              if (_imdbId) {
+                const url = `https://www.imdb.com/title/${_imdbId}/`;
+                Linking.openURL(url).catch(err => console.error('Error opening IMDb', err));
+              }
+            }}
+          >
             <FastImage
-              source={{ uri: IMDb_LOGO }}
+              source={IMDb_LOGO}
               style={[
                 styles.imdbLogo,
                 {
@@ -259,7 +268,7 @@ const MetadataDetails: React.FC<MetadataDetailsProps> = ({
                 fontSize: isTV ? 18 : isLargeTablet ? 17 : isTablet ? 16 : 15
               }
             ]}>{metadata.imdbRating}</Text>
-          </View>
+          </TouchableOpacity>
         )}
       </View>
 

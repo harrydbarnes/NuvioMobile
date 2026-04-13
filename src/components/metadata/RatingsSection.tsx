@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image, Animated, Dimensions, TouchableOpacity, Linking } from 'react-native';
 import { MaterialIcons as MaterialIconsWrapper } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import FastImage from '@d11/react-native-fast-image';
@@ -23,7 +23,7 @@ const BREAKPOINTS = {
   tv: 1440,
 };
 
-const IMDb_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/575px-IMDB_Logo_2016.svg.png';
+const IMDb_LOGO = require('../../../assets/rating-icons/imdb.png');
 
 export const RATING_PROVIDERS = {
   imdb: {
@@ -183,7 +183,7 @@ export const RatingsSection: React.FC<RatingsSectionProps> = ({ imdbId, type }) 
   const ratingConfig = {
     imdb: {
       name: 'IMDb',
-      icon: { uri: IMDb_LOGO },
+      icon: IMDb_LOGO,
       isImage: true,
       color: '#F5C518',
       transform: (value: number) => value.toFixed(1)
@@ -264,7 +264,16 @@ export const RatingsSection: React.FC<RatingsSectionProps> = ({ imdbId, type }) 
           const displayValue = config.transform(parseFloat(value as string));
 
           return (
-            <View key={source} style={[styles.compactRatingItem, { marginRight: itemSpacing }]}>
+            <TouchableOpacity
+              key={source}
+              style={[styles.compactRatingItem, { marginRight: itemSpacing }]}
+              disabled={source !== 'imdb'}
+              onPress={() => {
+                if (source === 'imdb' && imdbId) {
+                  Linking.openURL(`https://www.imdb.com/title/${imdbId}/`).catch(console.error);
+                }
+              }}
+            >
               {config.isImage ? (
                 <FastImage
                   source={config.icon as any}
@@ -296,7 +305,7 @@ export const RatingsSection: React.FC<RatingsSectionProps> = ({ imdbId, type }) 
               <Text style={[styles.compactRatingValue, { color: config.color, fontSize: textSize }]}>
                 {displayValue}
               </Text>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </View>

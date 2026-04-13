@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo, memo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions, useWindowDimensions, useColorScheme, FlatList, Modal, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions, useWindowDimensions, useColorScheme, FlatList, Modal, Pressable, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import FastImage from '@d11/react-native-fast-image';
@@ -58,7 +58,7 @@ interface SeriesContentProps {
 const DEFAULT_PLACEHOLDER = 'https://via.placeholder.com/300x450/1a1a1a/666666?text=No+Image';
 const EPISODE_PLACEHOLDER = 'https://via.placeholder.com/500x280/1a1a1a/666666?text=No+Preview';
 const TMDB_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tmdb.new.logo.svg/512px-Tmdb.new.logo.svg.png?20200406190906';
-const IMDb_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/575px-IMDB_Logo_2016.svg.png';
+const IMDb_LOGO = require('../../../assets/rating-icons/imdb.png');
 
 const SeriesContentComponent: React.FC<SeriesContentProps> = ({
   episodes,
@@ -1249,9 +1249,16 @@ const SeriesContentComponent: React.FC<SeriesContentProps> = ({
               {effectiveVote > 0 && (
                 <View style={styles.ratingContainer}>
                   {isImdbRating ? (
-                    <>
+                    <TouchableOpacity
+                      style={{flexDirection: 'row', alignItems: 'center'}}
+                      onPress={() => {
+                        if (imdbId) {
+                          Linking.openURL(`https://www.imdb.com/title/${imdbId}/`).catch(console.error);
+                        }
+                      }}
+                    >
                       <FastImage
-                        source={{ uri: IMDb_LOGO }}
+                        source={IMDb_LOGO}
                         style={[
                           styles.tmdbLogo, // Reuse same style for dimensions
                           {
@@ -1272,7 +1279,7 @@ const SeriesContentComponent: React.FC<SeriesContentProps> = ({
                       ]}>
                         {effectiveVote.toFixed(1)}
                       </Text>
-                    </>
+                    </TouchableOpacity>
                   ) : (
                     <>
                       <FastImage
@@ -1516,9 +1523,16 @@ const SeriesContentComponent: React.FC<SeriesContentProps> = ({
               {effectiveVote > 0 && (
                 <View style={styles.ratingContainerHorizontal}>
                   {isImdbRating ? (
-                    <>
+                    <TouchableOpacity
+                      style={{flexDirection: 'row', alignItems: 'center'}}
+                      onPress={() => {
+                        if (imdbId) {
+                          Linking.openURL(`https://www.imdb.com/title/${imdbId}/`).catch(console.error);
+                        }
+                      }}
+                    >
                       <FastImage
-                        source={{ uri: IMDb_LOGO }}
+                        source={IMDb_LOGO}
                         style={[
                           styles.tmdbLogo, // Reuse same style
                           {
@@ -1539,7 +1553,7 @@ const SeriesContentComponent: React.FC<SeriesContentProps> = ({
                       ]}>
                         {effectiveVote.toFixed(1)}
                       </Text>
-                    </>
+                    </TouchableOpacity>
                   ) : (
                     <>
                       <FastImage

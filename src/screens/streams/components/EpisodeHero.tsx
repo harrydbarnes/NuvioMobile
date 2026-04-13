@@ -81,7 +81,7 @@ const EpisodeHero = memo(
                         {hasIMDbRating ? (
                           <>
                             <FastImage
-                              source={{ uri: IMDb_LOGO }}
+                              source={IMDb_LOGO}
                               style={styles.imdbLogo}
                               resizeMode={FastImage.resizeMode.contain}
                             />
