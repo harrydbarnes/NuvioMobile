@@ -43,30 +43,9 @@ import { useSettings } from '../hooks/useSettings';
 import { useTranslation } from 'react-i18next';
 import { useScrollToTop } from '../contexts/ScrollToTopContext';
 import { TMDBService } from '../services/tmdbService';
-
-interface LibraryItem extends StreamingContent {
-  progress?: number;
-  lastWatched?: string;
-  gradient: [string, string];
-  imdbId?: string;
-  traktId: number;
-  images?: TraktImages;
-  watched?: boolean;
-}
-
-interface TraktDisplayItem {
-  id: string;
-  name: string;
-  type: 'movie' | 'series';
-  poster: string;
-  year?: number;
-  lastWatched?: string;
-  plays?: number;
-  rating?: number;
-  imdbId?: string;
-  traktId: number;
-  images?: TraktImages;
-}
+import { TraktItem, TraktDisplayItem } from '../components/library/TraktItem';
+import { LocalLibraryItem, LibraryItem } from '../components/library/LocalLibraryItem';
+import { MalLibraryItem } from '../components/library/MalLibraryItem';
 
 interface TraktFolder {
   id: string;
@@ -90,102 +69,6 @@ function getGridLayout(screenWidth: number): { numColumns: number; itemWidth: nu
   const itemWidth = Math.floor(available / numColumns);
   return { numColumns, itemWidth };
 }
-
-const TraktItem = React.memo(({
-  item,
-  width,
-  navigation,
-  currentTheme,
-  showTitles
-}: {
-  item: TraktDisplayItem;
-  width: number;
-  navigation: any;
-  currentTheme: any;
-  showTitles: boolean;
-}) => {
-  const [posterUrl, setPosterUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchPoster = async () => {
-      if (item.images) {
-        const url = TraktService.getTraktPosterUrl(item.images);
-        if (isMounted && url) {
-          setPosterUrl(url);
-          return;
-        }
-      }
-
-      if (item.imdbId || item.traktId) {
-        try {
-          const tmdbService = TMDBService.getInstance();
-          let tmdbId: number | null = null;
-
-          if (item.imdbId) {
-            tmdbId = await tmdbService.findTMDBIdByIMDB(item.imdbId);
-          }
-
-          if (tmdbId) {
-            let posterPath: string | null = null;
-
-            if (item.type === 'movie') {
-              const details = await tmdbService.getMovieDetails(String(tmdbId));
-              posterPath = details?.poster_path ?? null;
-            } else {
-              const details = await tmdbService.getTVShowDetails(tmdbId);
-              posterPath = details?.poster_path ?? null;
-            }
-
-            if (isMounted && posterPath) {
-              const url = tmdbService.getImageUrl(posterPath, 'w500');
-              setPosterUrl(url);
-            }
-          }
-        } catch (error) {
-          logger.debug('Failed to fetch poster from TMDB', error);
-        }
-      }
-    };
-    fetchPoster();
-    return () => { isMounted = false; };
-  }, [item.images, item.imdbId, item.traktId, item.type]);
-
-  const handlePress = useCallback(() => {
-    if (item.imdbId) {
-      navigation.navigate('Metadata', { id: item.imdbId, type: item.type });
-    }
-  }, [navigation, item.imdbId, item.type]);
-
-  return (
-    <TouchableOpacity
-      style={[styles.itemContainer, { width }]}
-      onPress={handlePress}
-      activeOpacity={0.7}
-    >
-      <View>
-        <View style={[styles.posterContainer, { shadowColor: currentTheme.colors.black }]}>
-          {posterUrl ? (
-            <FastImage
-              source={{ uri: posterUrl }}
-              style={styles.poster}
-              resizeMode={FastImage.resizeMode.cover}
-            />
-          ) : (
-            <View style={[styles.poster, { backgroundColor: currentTheme.colors.elevation1, justifyContent: 'center', alignItems: 'center' }]}>
-              <ActivityIndicator color={currentTheme.colors.primary} />
-            </View>
-          )}
-        </View>
-        {showTitles && (
-          <Text style={[styles.cardTitle, { color: currentTheme.colors.mediumEmphasis }]}>
-            {item.name}
-          </Text>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-});
 
 const SkeletonLoader = () => {
   const pulseAnim = React.useRef(new RNAnimated.Value(0)).current;
@@ -850,47 +733,18 @@ const LibraryScreen = () => {
     return folders.filter(folder => folder.itemCount > 0);
   }, [simklAuthenticated, watchingShows, watchingMovies, watchingAnime, planToWatchShows, planToWatchMovies, planToWatchAnime, completedShows, completedMovies, completedAnime, onHoldShows, onHoldMovies, onHoldAnime, droppedShows, droppedMovies, droppedAnime, simklContinueWatching, simklRatedContent, t]);
 
-  const renderItem = ({ item }: { item: LibraryItem }) => (
-    <TouchableOpacity
-      style={[styles.itemContainer, { width: itemWidth }]}
-      onPress={() => navigation.navigate('Metadata', { id: item.id, type: item.type })}
-      onLongPress={() => {
-        setSelectedItem(item);
-        setMenuVisible(true);
-      }}
-      activeOpacity={0.7}
-    >
-      <View>
-        <View style={[styles.posterContainer, { shadowColor: currentTheme.colors.black, borderRadius: settings.posterBorderRadius ?? 12 }]}>
-          <FastImage
-            source={{ uri: item.poster || 'https://via.placeholder.com/300x450' }}
-            style={[styles.poster, { borderRadius: settings.posterBorderRadius ?? 12 }]}
-            resizeMode={FastImage.resizeMode.cover}
-          />
-          {item.watched && (
-            <View style={styles.watchedIndicator}>
-              <MaterialIcons name="check-circle" size={22} color={currentTheme.colors.success || '#4CAF50'} />
-            </View>
-          )}
-          {item.progress !== undefined && item.progress < 1 && (
-            <View style={styles.progressBarContainer}>
-              <View
-                style={[
-                  styles.progressBar,
-                  { width: `${item.progress * 100}%`, backgroundColor: currentTheme.colors.primary }
-                ]}
-              />
-            </View>
-          )}
-        </View>
-        {settings.showPosterTitles && (
-          <Text style={[styles.cardTitle, { color: currentTheme.colors.mediumEmphasis }]}>
-            {item.name}
-          </Text>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+  const renderItem = useCallback(({ item }: { item: LibraryItem }) => (
+    <LocalLibraryItem
+      item={item}
+      itemWidth={itemWidth}
+      navigation={navigation}
+      currentTheme={currentTheme}
+      settings={settings}
+      styles={styles}
+      setSelectedItem={setSelectedItem}
+      setMenuVisible={setMenuVisible}
+    />
+  ), [itemWidth, navigation, currentTheme, settings, styles]);
 
   const renderTraktCollectionFolder = ({ folder }: { folder: TraktFolder }) => (
     <TouchableOpacity
@@ -964,8 +818,9 @@ const LibraryScreen = () => {
       navigation={navigation}
       currentTheme={currentTheme}
       showTitles={settings.showPosterTitles}
+      styles={styles}
     />;
-  }, [itemWidth, navigation, currentTheme, settings.showPosterTitles]);
+  }, [itemWidth, navigation, currentTheme, settings.showPosterTitles, styles]);
 
   const getTraktFolderItems = useCallback((folderId: string): TraktDisplayItem[] => {
     const items: TraktDisplayItem[] = [];
@@ -1502,46 +1357,16 @@ const LibraryScreen = () => {
     }
   }, [malLoading, malOffset, hasMoreMal]);
 
-  const renderMalItem = ({ item }: { item: MalAnimeNode }) => (
-    <TouchableOpacity
-      style={[styles.itemContainer, { width: itemWidth }]}
-      onPress={() => navigation.navigate('Metadata', { 
-          id: `mal:${item.node.id}`, 
-          type: item.node.media_type === 'movie' ? 'movie' : 'series' 
-      })}
-      activeOpacity={0.7}
-    >
-      <View>
-        <View style={[styles.posterContainer, { shadowColor: currentTheme.colors.black, borderRadius: settings.posterBorderRadius ?? 12 }]}>
-          <FastImage
-            source={{ uri: item.node.main_picture?.large || item.node.main_picture?.medium || 'https://via.placeholder.com/300x450' }}
-            style={[styles.poster, { borderRadius: settings.posterBorderRadius ?? 12 }]}
-            resizeMode={FastImage.resizeMode.cover}
-          />
-          <View style={styles.malBadge}>
-             <Text style={styles.malBadgeText}>{item.list_status.status.replace('_', ' ')}</Text>
-          </View>
-          <View style={styles.progressBarContainer}>
-              <View
-                style={[
-                  styles.progressBar,
-                  { 
-                      width: `${(item.list_status.num_episodes_watched / (item.node.num_episodes || 1)) * 100}%`, 
-                      backgroundColor: '#2E51A2' 
-                  }
-                ]}
-              />
-          </View>
-        </View>
-        <Text style={[styles.cardTitle, { color: currentTheme.colors.mediumEmphasis }]} numberOfLines={2}>
-          {item.node.title}
-        </Text>
-        <Text style={[styles.malScore, { color: '#F5C518' }]}>
-           ★ {item.list_status.score > 0 ? item.list_status.score : '-'}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderMalItem = useCallback(({ item }: { item: MalAnimeNode }) => (
+    <MalLibraryItem
+      item={item}
+      itemWidth={itemWidth}
+      navigation={navigation}
+      currentTheme={currentTheme}
+      settings={settings}
+      styles={styles}
+    />
+  ), [itemWidth, navigation, currentTheme, settings, styles]);
 
   const renderSimklCollectionFolder = ({ folder }: { folder: TraktFolder }) => (
     <TouchableOpacity
