@@ -206,6 +206,11 @@ const ContinueWatchingSection = React.forwardRef<ContinueWatchingRef>((_, ref) =
         onEndReachedThreshold={0.7}
         onEndReached={() => {}}
         removeClippedSubviews={true}
+        // Performance optimization: limit synchronous renders to reduce memory and UI thread blocking
+        initialNumToRender={isTV ? 6 : isLargeTablet ? 5 : isTablet ? 4 : 3}
+        maxToRenderPerBatch={isTV ? 4 : isLargeTablet ? 4 : 3}
+        windowSize={isTV ? 4 : isLargeTablet ? 4 : 3}
+        updateCellsBatchingPeriod={50}
       />
 
       <ContinueWatchingActionSheet

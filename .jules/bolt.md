@@ -1,0 +1,3 @@
+## 2024-04-12 - Missing FlatList Optimizations in Lists
+**Learning:** Certain FlatList components handling complex interactive cards (like the ContinueWatchingSection) were missing essential virtualization props (`initialNumToRender`, `maxToRenderPerBatch`, `windowSize`, `updateCellsBatchingPeriod`). Without these, large watch histories will try to render all off-screen items synchronously, causing massive UI thread blocking and memory bloat on startup or refresh.
+**Action:** Always verify `FlatList` implementations, especially those displaying media content or progress cards, include dynamic virtualization props suited for the target platform (TV vs Tablet vs Phone) to balance fast initial render and smooth scrolling.
