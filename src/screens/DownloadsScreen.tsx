@@ -688,6 +688,11 @@ const DownloadsScreen: React.FC = () => {
           style={{ backgroundColor: currentTheme.colors.darkBackground }}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          // Bolt ⚡ Optimization: Limit synchronous renders to reduce UI thread blocking and memory bloat
+          initialNumToRender={isTablet ? 12 : 8}
+          maxToRenderPerBatch={isTablet ? 8 : 6}
+          windowSize={11}
+          updateCellsBatchingPeriod={50}
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}
