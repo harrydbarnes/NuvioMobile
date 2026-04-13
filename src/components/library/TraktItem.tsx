@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import FastImage from '@d11/react-native-fast-image';
 import { TraktService, TraktImages } from '../../services/traktService';
 import { TMDBService } from '../../services/tmdbService';
@@ -9,7 +9,7 @@ export interface TraktDisplayItem {
   id: string;
   name: string;
   type: 'movie' | 'series';
-  poster: string;
+  poster?: string;
   year?: number;
   lastWatched?: string;
   plays?: number;

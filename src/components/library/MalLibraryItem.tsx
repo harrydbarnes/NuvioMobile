@@ -37,7 +37,7 @@ export const MalLibraryItem = React.memo(({
             resizeMode={FastImage.resizeMode.cover}
           />
           <View style={styles.malBadge}>
-             <Text style={styles.malBadgeText}>{item.list_status.status.replace('_', ' ')}</Text>
+             <Text style={styles.malBadgeText}>{item.list_status.status.replace(/_/g, ' ')}</Text>
           </View>
           <View style={styles.progressBarContainer}>
               <View
