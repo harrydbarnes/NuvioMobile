@@ -33,10 +33,10 @@ import { mmkvStorage } from '../services/mmkvStorage';
 const ANDROID_STATUSBAR_HEIGHT = StatusBar.currentHeight || 0;
 
 // Trakt configuration
-const TRAKT_CLIENT_ID = process.env.EXPO_PUBLIC_TRAKT_CLIENT_ID as string;
+const TRAKT_CLIENT_ID = process.env.EXPO_PUBLIC_TRAKT_CLIENT_ID || '';
 
 if (!TRAKT_CLIENT_ID) {
-  throw new Error('Missing EXPO_PUBLIC_TRAKT_CLIENT_ID environment variable');
+  logger.warn('[TraktSettingsScreen] Missing EXPO_PUBLIC_TRAKT_CLIENT_ID environment variable. Trakt sign-in will be disabled.');
 }
 
 const discovery = {
@@ -234,6 +234,10 @@ const TraktSettingsScreen: React.FC = () => {
   const handleSignIn = () => {
     if (isSimklAuthenticated) {
       openAlert('Conflict', 'You cannot connect to Trakt while Simkl is connected. Please disconnect Simkl first.');
+      return;
+    }
+    if (!TRAKT_CLIENT_ID) {
+      openAlert('Configuration Error', 'Trakt sign-in is unavailable because the app is missing Trakt client configuration.');
       return;
     }
     promptAsync(); // Trigger the authentication flow
@@ -509,7 +513,7 @@ const TraktSettingsScreen: React.FC = () => {
                   { backgroundColor: isDarkMode ? currentTheme.colors.primary : currentTheme.colors.primary }
                 ]}
                 onPress={handleSignIn}
-                disabled={!request || isExchangingCode} // Disable while waiting for response or exchanging code
+                disabled={!request || isExchangingCode || !TRAKT_CLIENT_ID} // Disable while waiting for response or exchanging code
               >
                 {isExchangingCode ? (
                   <ActivityIndicator size="small" color="white" />
