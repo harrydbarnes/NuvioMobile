@@ -143,9 +143,15 @@ class MMKVStorage {
   setString(key: string, value: string): void {
     try {
       this.storage.set(key, value);
-      this.setCached(key, value);
     } catch (error) {
       logger.error(`[MMKVStorage] Error setting string ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.setCached(key, value);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error caching string ${key}:`, error);
     }
   }
 
@@ -161,9 +167,15 @@ class MMKVStorage {
   setNumber(key: string, value: number): void {
     try {
       this.storage.set(key, value);
-      this.setCached(key, value.toString());
     } catch (error) {
       logger.error(`[MMKVStorage] Error setting number ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.invalidateCache(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error invalidating cache for number ${key}:`, error);
     }
   }
 
@@ -179,9 +191,15 @@ class MMKVStorage {
   setBoolean(key: string, value: boolean): void {
     try {
       this.storage.set(key, value);
-      this.setCached(key, value.toString());
     } catch (error) {
       logger.error(`[MMKVStorage] Error setting boolean ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.invalidateCache(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error invalidating cache for boolean ${key}:`, error);
     }
   }
 
@@ -199,9 +217,15 @@ class MMKVStorage {
       if (this.storage.contains(key)) {
         this.storage.remove(key);
       }
-      this.invalidateCache(key);
     } catch (error) {
       logger.error(`[MMKVStorage] Error deleting key ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.invalidateCache(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error invalidating cache for deleted key ${key}:`, error);
     }
   }
 

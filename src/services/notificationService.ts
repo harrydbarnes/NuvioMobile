@@ -60,18 +60,21 @@ class NotificationService {
   private lastDownloadNotificationTime: Map<string, number> = new Map();
 
   private constructor() {
-    void this.bootstrap().catch((error) => {
-      logger.error('[NotificationService] Bootstrap failed:', error);
-    });
-    this.setupLibraryIntegration();
-    this.setupBackgroundSync();
-    this.setupAppStateHandling();
+    void this.bootstrap();
   }
 
   private async bootstrap(): Promise<void> {
-    await this.configureNotifications();
-    await this.loadSettings();
-    await this.loadScheduledNotifications();
+    try {
+      await this.configureNotifications();
+      await this.loadSettings();
+      await this.loadScheduledNotifications();
+    } catch (error) {
+      logger.error('[NotificationService] Bootstrap failed:', error);
+    } finally {
+      this.setupLibraryIntegration();
+      this.setupBackgroundSync();
+      this.setupAppStateHandling();
+    }
   }
 
   static getInstance(): NotificationService {
