@@ -33,7 +33,7 @@ import { mmkvStorage } from '../services/mmkvStorage';
 const ANDROID_STATUSBAR_HEIGHT = StatusBar.currentHeight || 0;
 
 // Trakt configuration
-const TRAKT_CLIENT_ID = process.env.EXPO_PUBLIC_TRAKT_CLIENT_ID || '';
+const TRAKT_CLIENT_ID = process.env.EXPO_PUBLIC_TRAKT_CLIENT_ID;
 
 if (!TRAKT_CLIENT_ID) {
   logger.warn('[TraktSettingsScreen] Missing EXPO_PUBLIC_TRAKT_CLIENT_ID environment variable. Trakt sign-in will be disabled.');
@@ -172,7 +172,7 @@ const TraktSettingsScreen: React.FC = () => {
   // Setup expo-auth-session hook with PKCE
   const [request, response, promptAsync] = useAuthRequest(
     {
-      clientId: TRAKT_CLIENT_ID,
+      clientId: TRAKT_CLIENT_ID ?? '',
       scopes: [],
       redirectUri: redirectUri,
       responseType: ResponseType.Code,
