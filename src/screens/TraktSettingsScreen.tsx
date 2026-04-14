@@ -34,8 +34,9 @@ const ANDROID_STATUSBAR_HEIGHT = StatusBar.currentHeight || 0;
 
 // Trakt configuration
 const TRAKT_CLIENT_ID = process.env.EXPO_PUBLIC_TRAKT_CLIENT_ID;
+const IS_TRAKT_CONFIGURED = Boolean(TRAKT_CLIENT_ID);
 
-if (!TRAKT_CLIENT_ID) {
+if (!IS_TRAKT_CONFIGURED) {
   logger.warn('[TraktSettingsScreen] Missing EXPO_PUBLIC_TRAKT_CLIENT_ID environment variable. Trakt sign-in will be disabled.');
 }
 
@@ -172,7 +173,9 @@ const TraktSettingsScreen: React.FC = () => {
   // Setup expo-auth-session hook with PKCE
   const [request, response, promptAsync] = useAuthRequest(
     {
-      clientId: TRAKT_CLIENT_ID ?? '',
+      // `useAuthRequest` requires a string. This fallback is never used because sign-in
+      // is disabled when Trakt is not configured.
+      clientId: TRAKT_CLIENT_ID ?? 'trakt-not-configured',
       scopes: [],
       redirectUri: redirectUri,
       responseType: ResponseType.Code,
@@ -236,7 +239,7 @@ const TraktSettingsScreen: React.FC = () => {
       openAlert('Conflict', 'You cannot connect to Trakt while Simkl is connected. Please disconnect Simkl first.');
       return;
     }
-    if (!TRAKT_CLIENT_ID) {
+    if (!IS_TRAKT_CONFIGURED) {
       openAlert('Configuration Error', 'Trakt sign-in is unavailable because the app is missing Trakt client configuration.');
       return;
     }
@@ -513,7 +516,7 @@ const TraktSettingsScreen: React.FC = () => {
                   { backgroundColor: isDarkMode ? currentTheme.colors.primary : currentTheme.colors.primary }
                 ]}
                 onPress={handleSignIn}
-                disabled={!request || isExchangingCode || !TRAKT_CLIENT_ID} // Disable while waiting for response or exchanging code
+                disabled={!request || isExchangingCode || !IS_TRAKT_CONFIGURED} // Disable while waiting for response or exchanging code
               >
                 {isExchangingCode ? (
                   <ActivityIndicator size="small" color="white" />
