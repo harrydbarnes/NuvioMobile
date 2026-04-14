@@ -132,36 +132,100 @@ class MMKVStorage {
 
   // Direct MMKV access methods (for performance-critical operations)
   getString(key: string): string | undefined {
-    return this.storage.getString(key);
+    try {
+      return this.storage.getString(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error getting string ${key}:`, error);
+      return undefined;
+    }
   }
 
   setString(key: string, value: string): void {
-    this.storage.set(key, value);
+    try {
+      this.storage.set(key, value);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error setting string ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.setCached(key, value);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error caching string ${key}:`, error);
+    }
   }
 
   getNumber(key: string): number | undefined {
-    return this.storage.getNumber(key);
+    try {
+      return this.storage.getNumber(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error getting number ${key}:`, error);
+      return undefined;
+    }
   }
 
   setNumber(key: string, value: number): void {
-    this.storage.set(key, value);
+    try {
+      this.storage.set(key, value);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error setting number ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.invalidateCache(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error invalidating cache for number ${key}:`, error);
+    }
   }
 
   getBoolean(key: string): boolean | undefined {
-    return this.storage.getBoolean(key);
+    try {
+      return this.storage.getBoolean(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error getting boolean ${key}:`, error);
+      return undefined;
+    }
   }
 
   setBoolean(key: string, value: boolean): void {
-    this.storage.set(key, value);
+    try {
+      this.storage.set(key, value);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error setting boolean ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.invalidateCache(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error invalidating cache for boolean ${key}:`, error);
+    }
   }
 
   contains(key: string): boolean {
-    return this.storage.contains(key);
+    try {
+      return this.storage.contains(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error checking contains for ${key}:`, error);
+      return false;
+    }
   }
 
   delete(key: string): void {
-    if (this.storage.contains(key)) {
-      this.storage.remove(key);
+    try {
+      if (this.storage.contains(key)) {
+        this.storage.remove(key);
+      }
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error deleting key ${key}:`, error);
+      return;
+    }
+
+    try {
+      this.invalidateCache(key);
+    } catch (error) {
+      logger.error(`[MMKVStorage] Error invalidating cache for deleted key ${key}:`, error);
     }
   }
 
