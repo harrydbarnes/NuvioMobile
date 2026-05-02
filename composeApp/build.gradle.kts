@@ -288,7 +288,7 @@ configurations.all {
 }
 
 android {
-    namespace = "com.nuvio.app"
+    namespace = "com.nuvio.app.harrybarnes"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     signingConfigs {
@@ -303,11 +303,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.nuvio.app"
+        applicationId = "com.nuvio.app.harrybarnes"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = releaseAppVersionCode
-        versionName = releaseAppVersionName
+        versionName = "${releaseAppVersionName}-harrybarnes"
     }
     flavorDimensions += "distribution"
     productFlavors {
