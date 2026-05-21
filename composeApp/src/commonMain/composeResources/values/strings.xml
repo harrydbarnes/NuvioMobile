@@ -787,6 +787,8 @@
     <string name="settings_playback_reuse_last_link_description">Auto-play your last working stream for this same movie/episode when cache is still valid</string>
     <string name="settings_playback_secondary_audio_language">Secondary Audio Language</string>
     <string name="settings_playback_secondary_subtitle_language">Secondary Preferred Language</string>
+    <string name="settings_playback_show_only_preferred_subtitle_languages">Show Only Preferred Subtitle Languages</string>
+    <string name="settings_playback_show_only_preferred_subtitle_languages_description">Hide other subtitle languages from built-in and addon subtitle lists.</string>
     <string name="settings_playback_section_decoder">DECODER</string>
     <string name="settings_playback_section_next_episode">NEXT EPISODE</string>
     <string name="settings_playback_section_player">PLAYER</string>

@@ -499,7 +499,7 @@ fun PlayerScreen(
         var activeSubtitleTab by remember { mutableStateOf(SubtitleTab.BuiltIn) }
         val subtitleStyle = playerSettingsUiState.subtitleStyle
         val addonsUiState by AddonRepository.uiState.collectAsStateWithLifecycle()
-        val addonSubtitles by SubtitleRepository.addonSubtitles.collectAsStateWithLifecycle()
+        val fetchedAddonSubtitles by SubtitleRepository.addonSubtitles.collectAsStateWithLifecycle()
         val isLoadingAddonSubtitles by SubtitleRepository.isLoading.collectAsStateWithLifecycle()
         val activeAddonSubtitleType = contentType ?: parentMetaType
         val addonSubtitleFetchKey = remember(
@@ -515,6 +515,42 @@ fun PlayerScreen(
         }
         var autoFetchedAddonSubtitlesForKey by rememberSaveable(activeSourceUrl, activeVideoId) {
             mutableStateOf<String?>(null)
+        }
+        val preferredSubtitleTargets = remember(
+            playerSettingsUiState.preferredSubtitleLanguage,
+            playerSettingsUiState.secondaryPreferredSubtitleLanguage,
+        ) {
+            resolvePreferredSubtitleLanguageTargets(
+                preferredSubtitleLanguage = playerSettingsUiState.preferredSubtitleLanguage,
+                secondaryPreferredSubtitleLanguage = playerSettingsUiState.secondaryPreferredSubtitleLanguage,
+                deviceLanguages = DeviceLanguagePreferences.preferredLanguageCodes(),
+            )
+        }
+        val visibleSubtitleTracks = remember(
+            subtitleTracks,
+            preferredSubtitleTargets,
+            playerSettingsUiState.showOnlyPreferredSubtitleLanguages,
+            selectedSubtitleIndex,
+        ) {
+            filterVisibleSubtitleTracks(
+                tracks = subtitleTracks,
+                targets = preferredSubtitleTargets,
+                showOnlyPreferredLanguages = playerSettingsUiState.showOnlyPreferredSubtitleLanguages,
+                selectedIndex = selectedSubtitleIndex,
+            )
+        }
+        val addonSubtitles = remember(
+            fetchedAddonSubtitles,
+            preferredSubtitleTargets,
+            playerSettingsUiState.showOnlyPreferredSubtitleLanguages,
+            selectedAddonSubtitleId,
+        ) {
+            filterVisibleAddonSubtitles(
+                subtitles = fetchedAddonSubtitles,
+                targets = preferredSubtitleTargets,
+                showOnlyPreferredLanguages = playerSettingsUiState.showOnlyPreferredSubtitleLanguages,
+                selectedId = selectedAddonSubtitleId,
+            )
         }
 
         fun refreshTracks() {
@@ -549,12 +585,6 @@ fun PlayerScreen(
             }
 
             if (!preferredSubtitleSelectionApplied) {
-                val preferredSubtitleTargets = resolvePreferredSubtitleLanguageTargets(
-                    preferredSubtitleLanguage = playerSettingsUiState.preferredSubtitleLanguage,
-                    secondaryPreferredSubtitleLanguage = playerSettingsUiState.secondaryPreferredSubtitleLanguage,
-                    deviceLanguages = DeviceLanguagePreferences.preferredLanguageCodes(),
-                )
-
                 if (preferredSubtitleTargets.isEmpty()) {
                     if (selectedSubtitleIndex != -1 || subtitleTracks.any { it.isSelected }) {
                         playerController?.selectSubtitleTrack(-1)
@@ -2094,7 +2124,7 @@ fun PlayerScreen(
             SubtitleModal(
                 visible = showSubtitleModal,
                 activeTab = activeSubtitleTab,
-                subtitleTracks = subtitleTracks,
+                subtitleTracks = visibleSubtitleTracks,
                 selectedSubtitleIndex = selectedSubtitleIndex,
                 addonSubtitles = addonSubtitles,
                 selectedAddonSubtitleId = selectedAddonSubtitleId,
@@ -2342,4 +2372,37 @@ private fun findPreferredSubtitleTrackIndex(
     }
 
     return -1
+}
+
+private fun filterVisibleSubtitleTracks(
+    tracks: List<SubtitleTrack>,
+    targets: List<String>,
+    showOnlyPreferredLanguages: Boolean,
+    selectedIndex: Int,
+): List<SubtitleTrack> {
+    if (!showOnlyPreferredLanguages) return tracks
+    if (targets.isEmpty()) return tracks.filter { it.index == selectedIndex }
+    return tracks.filter { track ->
+        track.index == selectedIndex || targets.any { target -> subtitleTrackMatchesTarget(track, target) }
+    }
+}
+
+private fun filterVisibleAddonSubtitles(
+    subtitles: List<AddonSubtitle>,
+    targets: List<String>,
+    showOnlyPreferredLanguages: Boolean,
+    selectedId: String?,
+): List<AddonSubtitle> {
+    if (!showOnlyPreferredLanguages) return subtitles
+    if (targets.isEmpty()) return subtitles.filter { it.id == selectedId }
+    return subtitles.filter { subtitle ->
+        subtitle.id == selectedId ||
+            targets.any { target -> languageMatchesPreference(subtitle.language, target) }
+    }
+}
+
+private fun subtitleTrackMatchesTarget(track: SubtitleTrack, target: String): Boolean {
+    val normalizedTarget = normalizeLanguageCode(target)
+    return (normalizedTarget == SubtitleLanguageOption.FORCED && track.isForced) ||
+        languageMatchesPreference(track.language, target)
 }

@@ -42,6 +42,7 @@ data class PlayerSettingsUiState(
     val secondaryPreferredAudioLanguage: String? = null,
     val preferredSubtitleLanguage: String = SubtitleLanguageOption.NONE,
     val secondaryPreferredSubtitleLanguage: String? = null,
+    val showOnlyPreferredSubtitleLanguages: Boolean = false,
     val subtitleStyle: SubtitleStyleState = SubtitleStyleState.DEFAULT,
     val streamReuseLastLinkEnabled: Boolean = false,
     val streamReuseLastLinkCacheHours: Int = 24,
@@ -98,6 +99,7 @@ object PlayerSettingsRepository {
     private var secondaryPreferredAudioLanguage: String? = null
     private var preferredSubtitleLanguage = SubtitleLanguageOption.NONE
     private var secondaryPreferredSubtitleLanguage: String? = null
+    private var showOnlyPreferredSubtitleLanguages = false
     private var subtitleStyle = SubtitleStyleState.DEFAULT
     private var streamReuseLastLinkEnabled = false
     private var streamReuseLastLinkCacheHours = 24
@@ -159,6 +161,7 @@ object PlayerSettingsRepository {
         secondaryPreferredAudioLanguage = null
         preferredSubtitleLanguage = SubtitleLanguageOption.NONE
         secondaryPreferredSubtitleLanguage = null
+        showOnlyPreferredSubtitleLanguages = false
         subtitleStyle = SubtitleStyleState.DEFAULT
         streamReuseLastLinkEnabled = false
         streamReuseLastLinkCacheHours = 24
@@ -222,6 +225,8 @@ object PlayerSettingsRepository {
                 ?: SubtitleLanguageOption.NONE
         secondaryPreferredSubtitleLanguage =
             normalizeLanguageCode(PlayerSettingsStorage.loadSecondaryPreferredSubtitleLanguage())
+        showOnlyPreferredSubtitleLanguages =
+            PlayerSettingsStorage.loadShowOnlyPreferredSubtitleLanguages() ?: false
         subtitleStyle = SubtitleStyleState(
             textColor = subtitleColorFromStorage(PlayerSettingsStorage.loadSubtitleTextColor())
                 ?: SubtitleStyleState.DEFAULT.textColor,
@@ -400,6 +405,14 @@ object PlayerSettingsRepository {
         secondaryPreferredSubtitleLanguage = normalized
         publish()
         PlayerSettingsStorage.saveSecondaryPreferredSubtitleLanguage(normalized)
+    }
+
+    fun setShowOnlyPreferredSubtitleLanguages(enabled: Boolean) {
+        ensureLoaded()
+        if (showOnlyPreferredSubtitleLanguages == enabled) return
+        showOnlyPreferredSubtitleLanguages = enabled
+        publish()
+        PlayerSettingsStorage.saveShowOnlyPreferredSubtitleLanguages(enabled)
     }
 
     fun setSubtitleStyle(style: SubtitleStyleState) {
@@ -777,6 +790,7 @@ object PlayerSettingsRepository {
             secondaryPreferredAudioLanguage = secondaryPreferredAudioLanguage,
             preferredSubtitleLanguage = preferredSubtitleLanguage,
             secondaryPreferredSubtitleLanguage = secondaryPreferredSubtitleLanguage,
+            showOnlyPreferredSubtitleLanguages = showOnlyPreferredSubtitleLanguages,
             subtitleStyle = subtitleStyle,
             streamReuseLastLinkEnabled = streamReuseLastLinkEnabled,
             streamReuseLastLinkCacheHours = streamReuseLastLinkCacheHours,

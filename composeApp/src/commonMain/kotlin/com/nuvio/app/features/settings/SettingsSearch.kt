@@ -460,6 +460,11 @@ internal fun settingsSearchEntries(
             PlaybackSearchRow("secondary-audio", stringResource(Res.string.settings_playback_secondary_audio_language)),
             PlaybackSearchRow("preferred-subtitles", stringResource(Res.string.settings_playback_preferred_subtitle_language)),
             PlaybackSearchRow("secondary-subtitles", stringResource(Res.string.settings_playback_secondary_subtitle_language)),
+            PlaybackSearchRow(
+                "show-only-preferred-subtitles",
+                stringResource(Res.string.settings_playback_show_only_preferred_subtitle_languages),
+                stringResource(Res.string.settings_playback_show_only_preferred_subtitle_languages_description),
+            ),
         ),
     )
     addPlaybackRows(

@@ -29,6 +29,7 @@ actual object PlayerSettingsStorage {
     private const val secondaryPreferredAudioLanguageKey = "secondary_preferred_audio_language"
     private const val preferredSubtitleLanguageKey = "preferred_subtitle_language"
     private const val secondaryPreferredSubtitleLanguageKey = "secondary_preferred_subtitle_language"
+    private const val showOnlyPreferredSubtitleLanguagesKey = "show_only_preferred_subtitle_languages"
     private const val subtitleTextColorKey = "subtitle_text_color"
     private const val subtitleOutlineEnabledKey = "subtitle_outline_enabled"
     private const val subtitleFontSizeSpKey = "subtitle_font_size_sp"
@@ -82,6 +83,7 @@ actual object PlayerSettingsStorage {
         secondaryPreferredAudioLanguageKey,
         preferredSubtitleLanguageKey,
         secondaryPreferredSubtitleLanguageKey,
+        showOnlyPreferredSubtitleLanguagesKey,
         subtitleTextColorKey,
         subtitleOutlineEnabledKey,
         subtitleFontSizeSpKey,
@@ -276,6 +278,19 @@ actual object PlayerSettingsStorage {
                     putString(key, language)
                 }
             }
+            ?.apply()
+    }
+
+    actual fun loadShowOnlyPreferredSubtitleLanguages(): Boolean? =
+        preferences?.let { prefs ->
+            val key = ProfileScopedKey.of(showOnlyPreferredSubtitleLanguagesKey)
+            if (prefs.contains(key)) prefs.getBoolean(key, false) else null
+        }
+
+    actual fun saveShowOnlyPreferredSubtitleLanguages(enabled: Boolean) {
+        preferences
+            ?.edit()
+            ?.putBoolean(ProfileScopedKey.of(showOnlyPreferredSubtitleLanguagesKey), enabled)
             ?.apply()
     }
 
@@ -824,6 +839,7 @@ actual object PlayerSettingsStorage {
         loadSecondaryPreferredAudioLanguage()?.let { put(secondaryPreferredAudioLanguageKey, encodeSyncString(it)) }
         loadPreferredSubtitleLanguage()?.let { put(preferredSubtitleLanguageKey, encodeSyncString(it)) }
         loadSecondaryPreferredSubtitleLanguage()?.let { put(secondaryPreferredSubtitleLanguageKey, encodeSyncString(it)) }
+        loadShowOnlyPreferredSubtitleLanguages()?.let { put(showOnlyPreferredSubtitleLanguagesKey, encodeSyncBoolean(it)) }
         loadSubtitleTextColor()?.let { put(subtitleTextColorKey, encodeSyncString(it)) }
         loadSubtitleOutlineEnabled()?.let { put(subtitleOutlineEnabledKey, encodeSyncBoolean(it)) }
         loadSubtitleFontSizeSp()?.let { put(subtitleFontSizeSpKey, encodeSyncInt(it)) }
@@ -881,6 +897,7 @@ actual object PlayerSettingsStorage {
         payload.decodeSyncString(secondaryPreferredAudioLanguageKey)?.let(::saveSecondaryPreferredAudioLanguage)
         payload.decodeSyncString(preferredSubtitleLanguageKey)?.let(::savePreferredSubtitleLanguage)
         payload.decodeSyncString(secondaryPreferredSubtitleLanguageKey)?.let(::saveSecondaryPreferredSubtitleLanguage)
+        payload.decodeSyncBoolean(showOnlyPreferredSubtitleLanguagesKey)?.let(::saveShowOnlyPreferredSubtitleLanguages)
         payload.decodeSyncString(subtitleTextColorKey)?.let(::saveSubtitleTextColor)
         payload.decodeSyncBoolean(subtitleOutlineEnabledKey)?.let(::saveSubtitleOutlineEnabled)
         payload.decodeSyncInt(subtitleFontSizeSpKey)?.let(::saveSubtitleFontSizeSp)

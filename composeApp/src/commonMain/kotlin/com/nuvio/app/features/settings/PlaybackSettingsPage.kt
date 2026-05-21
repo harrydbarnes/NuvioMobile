@@ -83,6 +83,7 @@ internal fun LazyListScope.playbackSettingsContent(
     secondaryPreferredAudioLanguage: String?,
     preferredSubtitleLanguage: String,
     secondaryPreferredSubtitleLanguage: String?,
+    showOnlyPreferredSubtitleLanguages: Boolean,
     streamReuseLastLinkEnabled: Boolean,
     streamReuseLastLinkCacheHours: Int,
     decoderPriority: Int,
@@ -101,6 +102,7 @@ internal fun LazyListScope.playbackSettingsContent(
             secondaryPreferredAudioLanguage = secondaryPreferredAudioLanguage,
             preferredSubtitleLanguage = preferredSubtitleLanguage,
             secondaryPreferredSubtitleLanguage = secondaryPreferredSubtitleLanguage,
+            showOnlyPreferredSubtitleLanguages = showOnlyPreferredSubtitleLanguages,
             streamReuseLastLinkEnabled = streamReuseLastLinkEnabled,
             streamReuseLastLinkCacheHours = streamReuseLastLinkCacheHours,
             decoderPriority = decoderPriority,
@@ -163,6 +165,7 @@ private fun PlaybackSettingsSection(
     secondaryPreferredAudioLanguage: String?,
     preferredSubtitleLanguage: String,
     secondaryPreferredSubtitleLanguage: String?,
+    showOnlyPreferredSubtitleLanguages: Boolean,
     streamReuseLastLinkEnabled: Boolean,
     streamReuseLastLinkCacheHours: Int,
     decoderPriority: Int,
@@ -312,6 +315,14 @@ private fun PlaybackSettingsSection(
                     description = languageLabelForCode(secondaryPreferredSubtitleLanguage),
                     isTablet = isTablet,
                     onClick = { showSecondarySubtitleDialog = true },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_playback_show_only_preferred_subtitle_languages),
+                    description = stringResource(Res.string.settings_playback_show_only_preferred_subtitle_languages_description),
+                    checked = showOnlyPreferredSubtitleLanguages,
+                    isTablet = isTablet,
+                    onCheckedChange = PlayerSettingsRepository::setShowOnlyPreferredSubtitleLanguages,
                 )
             }
         }
