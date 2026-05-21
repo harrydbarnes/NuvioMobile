@@ -377,6 +377,13 @@ android {
                 debugSymbolLevel = "FULL"
             }
         }
+        create("pr") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            applicationIdSuffix = ".harrybarnes"
+            versionNameSuffix = "-harrybarnes"
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
